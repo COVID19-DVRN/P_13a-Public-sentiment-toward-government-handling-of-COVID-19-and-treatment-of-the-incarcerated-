@@ -1,0 +1,1 @@
+title:((coronavirus OR COVID* OR SARS) AND (jail OR prison* OR incarc* OR detain* OR offend* OR inmate* OR "correctional facility" OR "detention center") NOT Weinstein* NOT Exotic* NOT Tekashi* NOT 6ix9ine* NOT Tiger* NOT Avenatti* NOT "R. Kelly*" NOT Melly* NOT Shkreli* NOT Manafort* NOT "Bernie Madoff*" NOT "Michael Cohen*") AND tags_id_stories:8878461
