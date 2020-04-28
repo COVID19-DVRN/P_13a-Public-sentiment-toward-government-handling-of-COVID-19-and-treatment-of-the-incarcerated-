@@ -5,6 +5,7 @@ output: html_notebook
 
 ```{r packages}
 library(ggplot2)
+library(plyr)
 ```
 
 
@@ -14,6 +15,7 @@ cjail = read.csv('../data/cash_bail_full.csv', stringsAsFactors=FALSE)
 
 ```{r preprocessing}
 cjail$publish_date = mapply(as.Date, x=cjail$publish_date)
+cjail$year = floor(cjail$publish_date / 365)
 ```
 
 
@@ -21,7 +23,7 @@ MediaCloud search focused on titles mentioning incarceration-related terms and c
 
 ```{r search}
 # Search text
-pattern = "covid"
+pattern = "death"
 cjail$search_txt = mapply(grepl, pattern=pattern, x=cjail$new_text)
 cjail$search_title = mapply(grepl, pattern=pattern, x=cjail$raw_title)
 
@@ -31,26 +33,51 @@ print(sum(cjail$search) / nrow(cjail))
 
 
 ```{r}
-# Cumulative sums
-search_over_time = cjail[order(cjail$publish_date), c("publish_date", "search")]
-search_over_time$search_cumsum = cumsum(search_over_time$search)
+# Order data
+search_over_time = cjail[order(cjail$publish_date), c("publish_date", "search", "year")]
 
-search_over_time$placeholder = 1
-search_over_time$cumsum_cnt = cumsum(search_over_time$placeholder)
-search_over_time$placeholder = NULL
+## Search numbers
+# Count of search over time, reset each year
+search_over_time_peryear = ddply(search_over_time, .(year), summarize, cumsum(search))
+colnames(search_over_time_peryear) = c("year", "search_count")
+search_over_time_peryear$day = search_over_time$publish_date %% 365
+# Total search for each year
+max_search_by_yr = ddply(search_over_time_peryear, .(year), summarize, max(search_count))
+colnames(max_search_by_yr) = c("year", "annual_search_cnt")
 
-# Normalize counts over time
-search_over_time$search_cumsum_norm = search_over_time$search_cumsum / max(search_over_time$search_cumsum)
-search_over_time$cumsum_cnt_norm = search_over_time$cumsum_cnt / max(search_over_time$cumsum_cnt)
+
+## Count numbers
+# Count over time, reset each year
+search_over_time$counter = 1
+counter_over_time_peryear = ddply(search_over_time, .(year), summarize, cumsum(counter))
+colnames(counter_over_time_peryear) = c("year", "total_count")
+cnt_by_yr = ddply(counter_over_time_peryear, .(year), summarize, max(total_count))
+colnames(cnt_by_yr) = c("year", "annual_cnt")
+search_over_time_peryear$counter = NULL
+
+
+## Combine above data
+search_over_time_peryear = merge(search_over_time_peryear, max_search_by_yr, all=TRUE)
+search_over_time_peryear$total_count = counter_over_time_peryear$total_count
+search_over_time_peryear = merge(search_over_time_peryear, cnt_by_yr, all=TRUE)
+
+## Normalize
+search_over_time_peryear$search_count_norm = search_over_time_peryear$search_count / search_over_time_peryear$annual_search_cnt
+
+search_over_time_peryear$total_count_norm = search_over_time_peryear$total_count / search_over_time_peryear$annual_cnt
 ```
+
 
 ```{r}
 ggplot() + 
-  geom_line(data = search_over_time,
-            aes(x = publish_date, y = search_cumsum_norm),
+  geom_line(data = search_over_time_peryear,
+            aes(x = day, y = search_count_norm),
             color = "blue") + 
-  geom_line(data = search_over_time,
-            aes(x = publish_date, y = cumsum_cnt_norm), 
-            color = "red") 
+  geom_line(data = search_over_time_peryear,
+            aes(x = day, y = total_count_norm), 
+            color = "red") + 
+  facet_grid(~search_over_time_peryear$year) + 
+  ggtitle(pattern)
+
 ```
 
