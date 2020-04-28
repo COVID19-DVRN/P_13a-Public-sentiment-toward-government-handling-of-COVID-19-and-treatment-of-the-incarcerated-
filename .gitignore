@@ -3,3 +3,16 @@
 .RData
 .Ruserdata
 *.Rproj
+
+# Big data directories
+big-data/
+
+# Jupyter Notebook stuff
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+
+# Stray visual studio files
+.vs
+
+# Pycache
+__pycache__
