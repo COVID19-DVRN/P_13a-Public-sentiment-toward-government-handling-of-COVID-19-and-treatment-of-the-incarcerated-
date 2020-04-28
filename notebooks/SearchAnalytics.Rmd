@@ -9,7 +9,7 @@ library(ggplot2)
 
 
 ```{r load data}
-cjail = read.csv('../big-data/coronavirus_jail_full.csv', stringsAsFactors=FALSE)
+cjail = read.csv('../data/cash_bail_full.csv', stringsAsFactors=FALSE)
 ```
 
 ```{r preprocessing}
@@ -21,11 +21,12 @@ MediaCloud search focused on titles mentioning incarceration-related terms and c
 
 ```{r search}
 # Search text
-pattern = "reform"
+pattern = "covid"
 cjail$search_txt = mapply(grepl, pattern=pattern, x=cjail$new_text)
 cjail$search_title = mapply(grepl, pattern=pattern, x=cjail$raw_title)
 
 cjail$search = (cjail$search_txt | cjail$search_title)
+print(sum(cjail$search) / nrow(cjail))
 ```
 
 
