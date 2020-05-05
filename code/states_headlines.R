@@ -301,7 +301,9 @@ to_remove2 <- work %>%
 
 
 # revised text is in column new_text
-stories_no_dupes <- left_join(stories_no_dupes, work)
+stories_no_dupes <- left_join(stories_no_dupes, work) %>% 
+  select(-first_letters, -last_letters, -text)
+  
 
 write_rds(stories_no_dupes, here::here("data", "cleaned_text", "states_full.rds"))
 write_csv(stories_no_dupes, here::here("data", "cleaned_text", "states_full.csv"))
