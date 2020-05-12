@@ -1,6 +1,10 @@
 library(tidyverse)
 library(stringdist)
 library(rvest)
+library(here)
+
+## This code downloads the full text of articles after a given MediaCloud
+## dataset (compilation of titles and URLs) is obtained from explorer.mediacloud.org
 
 mediacloud_csv_path <- here::here("data", "mediacloud_downloads", "coronavirus_jail_states.csv")
 
